@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+.input {
+  @apply border rounded-lg px-4 py-2 w-full;
+}
+.page-bg {
+  @apply min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-10;
+}
+
+.card {
+  @apply max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-8;
+}
+
+.page-title {
+  @apply text-3xl font-bold text-gray-900 mb-2;
+}
+
+.page-subtitle {
+  @apply text-gray-600 mb-6;
+}
+
+.section {
+  @apply mb-8;
+}
+
+.section-title {
+  @apply text-xl font-semibold mb-4;
+}
+
+.grid-2 {
+  @apply grid md:grid-cols-2 gap-4;
+}
+
+.input {
+  @apply w-full border rounded-lg px-4 py-2;
+}
+
+.organ-grid {
+  @apply grid grid-cols-2 md:grid-cols-4 gap-4;
+}
+
+.organ-btn {
+  @apply p-4 rounded-xl border font-semibold bg-gray-100;
+}
+
+.organ-active {
+  @apply bg-green-600 text-white;
+}
+
+.consent-box {
+  @apply p-6 rounded-xl mb-6;
+}
+
+.consent-box.green {
+  @apply bg-green-50;
+}
+
+.consent-box.blue {
+  @apply bg-blue-50;
+}
+
+.consent-box.red {
+  @apply bg-red-50;
+}
+
+.consent-title {
+  @apply font-semibold mb-3;
+}
+
+.checkbox {
+  @apply flex items-center space-x-2 text-sm;
+}
+
+.final-consent {
+  @apply flex items-start space-x-3 bg-yellow-50 p-4 rounded-lg mb-6;
+}
+
+.icon-warning {
+  @apply h-5 w-5 text-yellow-600 mt-1;
+}
+
+.primary-btn {
+  @apply w-full bg-green-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 transition;
+}
+
+.btn-disabled {
+  @apply bg-gray-400 cursor-not-allowed hover:bg-gray-400;
+}
