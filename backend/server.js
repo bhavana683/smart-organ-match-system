@@ -15,7 +15,10 @@ dotenv.config();
 connectDB();
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: "https://smart-organ-match-system-2.onrender.com", // later replace with Netlify URL
+  credentials: true
+}));
 app.use(express.json());
 
 app.use("/api", authRoutes);

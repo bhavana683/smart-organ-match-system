@@ -96,9 +96,15 @@ const RecipientDashboard = () => {
 
       setMatches(response.data.matches || []);
       setTotalMatches(response.data.totalMatches || 0);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching matches:", error);
-      alert("Failed to find matches. Please try again.");
+      const serverMessage =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.response?.data?.details ||
+        error?.message ||
+        "Failed to find matches. Please try again.";
+      alert(serverMessage);
     } finally {
       setSearchingMatches(false);
     }

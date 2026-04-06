@@ -297,7 +297,19 @@ export const findMatches = async (req, res) => {
       matches: matches.slice(0, 5)
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("findMatches internal error:", {
+      message: error.message,
+      stack: error.stack,
+      response: error.response?.data || null,
+      userId: req.user?.id
+    });
+
+    res.status(500).json({
+      success: false,
+      message: "Matching failed",
+      error: error.message,
+      details: error.response?.data || null
+    });
   }
 };
 
@@ -332,6 +344,31 @@ import Donor from "../models/Donor.js";
 import Transaction from "../models/Transaction.js";
 import axios from "axios";
 
+const getHeuristicMatchScore = (donor, recipient, organNeeded) => {
+  const donorBlood = (donor.bloodGroup || "").toUpperCase();
+  const recipientBlood = (recipient.bloodGroup || "").toUpperCase();
+  const bloodMatchScore = donorBlood === recipientBlood ? 0.35 : 0.15;
+  const ageDiff = Math.min(Math.abs((donor.age || 40) - (recipient.age || 50)), 100);
+  const ageScore = 1 - ageDiff / 100;
+
+  let score = 0.5;
+
+  if (organNeeded === "kidney") {
+    const donorGfr = Number(donor.organs?.kidney?.donor_GFR ?? donor.organs?.kidney?.creatinineLevel ?? 80);
+    const recipientGfr = Number(recipient.organSpecificData?.recipient_GFR ?? recipient.organSpecificData?.creatinineLevel ?? 30);
+    const gfrScore = 1 - Math.min(Math.abs(donorGfr - recipientGfr) / 100, 1);
+    score = bloodMatchScore * 0.3 + ageScore * 0.3 + gfrScore * 0.4;
+  } else if (organNeeded === "heart") {
+    score = bloodMatchScore * 0.35 + ageScore * 0.35 + 0.3 * 0.3;
+  } else if (organNeeded === "liver") {
+    score = bloodMatchScore * 0.35 + ageScore * 0.30 + 0.35 * 0.35;
+  } else if (organNeeded === "lung") {
+    score = bloodMatchScore * 0.3 + ageScore * 0.35 + 0.3 * 0.35;
+  }
+
+  return Math.max(0.1, Math.min(score, 0.95));
+};
+
 /* =====================================================
    FIND MATCHES (All Organs Supported)
 ===================================================== */
@@ -347,7 +384,15 @@ export const findMatches = async (req, res) => {
       });
     }
 
-    const organNeeded = recipient.organNeeded;
+    const organNeeded = (recipient.organNeeded || "").toLowerCase();
+    const supportedOrgans = ["kidney", "liver", "heart", "lung"];
+
+    if (!supportedOrgans.includes(organNeeded)) {
+      return res.status(400).json({
+        success: false,
+        message: "Organ type currently not supported for matching"
+      });
+    }
 
     // Fetch only donors having that organ and active
     const donors = await Donor.find({
@@ -362,12 +407,15 @@ export const findMatches = async (req, res) => {
       });
     }
 
+    const mlBaseUrl = process.env.ML_SERVICE_URL || "https://smart-organ-match-system-1.onrender.com";
     const matches = [];
 
     for (const donor of donors) {
       const organData = donor.organs[organNeeded];
+      if (!organData) continue;
 
       let mlPayload = {};
+      let matchScore = 0.5;
 
       /* =======================
          KIDNEY
@@ -376,12 +424,12 @@ export const findMatches = async (req, res) => {
         mlPayload = {
           donor_age: donor.age,
           donor_blood_type: donor.bloodGroup,
-          donor_GFR: organData?.creatinineLevel,
+          donor_GFR: organData?.donor_GFR ?? organData?.creatinineLevel,
           donor_gender: donor.gender,
 
           recipient_age: recipient.age,
           recipient_blood_type: recipient.bloodGroup,
-          recipient_GFR: recipient.organSpecificData?.creatinineLevel,
+          recipient_GFR: recipient.organSpecificData?.recipient_GFR ?? recipient.organSpecificData?.creatinineLevel,
           recipient_gender: recipient.gender,
           viral_infection: 0,
           prior_transplant: 0
@@ -451,10 +499,25 @@ export const findMatches = async (req, res) => {
         };
       }
 
-      const response = await axios.post(
-        `https://smart-organ-match-system-1.onrender.com/predict/${organNeeded}`,
-        mlPayload
-      );
+      try {
+        const response = await axios.post(
+          `${mlBaseUrl}/predict/${organNeeded}`,
+          mlPayload,
+          { timeout: 7000 }
+        );
+
+        if (response?.data?.match_probability != null) {
+          matchScore = Number(response.data.match_probability);
+        } else {
+          throw new Error("ML response missing match_probability");
+        }
+      } catch (error) {
+        console.error(
+          `ML scoring failed for donor ${donor._id} organ ${organNeeded}:`,
+          error.response?.data || error.message || error
+        );
+        matchScore = getHeuristicMatchScore(donor, recipient, organNeeded);
+      }
 
       matches.push({
         donorId: donor._id,
@@ -463,7 +526,7 @@ export const findMatches = async (req, res) => {
         phone: donor.phone,
         city: donor.city,
         state: donor.state,
-        matchScore: response.data.match_probability
+        matchScore
       });
     }
 
