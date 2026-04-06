@@ -17,13 +17,18 @@ MODEL_URLS = {
 
 models = {}
 
-# 🔥 Download + Load models safely
+print("🚀 Starting ML service...")
+
 for organ, url in MODEL_URLS.items():
     path = os.path.join(BASE_DIR, f"{organ}_pipeline.pkl")
 
+    print(f"Checking {organ} model...")
+
     if not os.path.exists(path):
-        print(f"Downloading {organ} model...")
+        print(f"Downloading {organ} model from {url}")
         r = requests.get(url)
+
+        print(f"Status code: {r.status_code}")
 
         if r.status_code != 200:
             raise Exception(f"Failed to download {organ} model")
@@ -31,9 +36,9 @@ for organ, url in MODEL_URLS.items():
         with open(path, "wb") as f:
             f.write(r.content)
 
+    print(f"Loading {organ} model...")
     models[organ] = joblib.load(path)
     print(f"{organ} model loaded ✅")
-
 
 # ✅ Align input
 def build_aligned_df(model, data: dict) -> pd.DataFrame:
