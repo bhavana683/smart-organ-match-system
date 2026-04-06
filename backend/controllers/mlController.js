@@ -452,7 +452,7 @@ export const findMatches = async (req, res) => {
       }
 
       const response = await axios.post(
-        `http://localhost:5001/predict/${organNeeded}`,
+        `https://smart-organ-match-system-1.onrender.com/predict/${organNeeded}`,
         mlPayload
       );
 
