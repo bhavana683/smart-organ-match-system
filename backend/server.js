@@ -25,7 +25,8 @@ app.use("/api/recipient", recipientRoutes);
 app.use("/api/auth/donor", donorAuthRoutes);
 app.use("/api/auth/recipient", recipientAuthRoutes);
 app.use("/api/ml", mlRoutes);
+const PORT = process.env.PORT || 5000;
 
-app.listen(5000, () =>
-  console.log("Server running on port 5000")
-);
+app.listen(PORT, () => {
+  console.log("Server running on port", PORT);
+});
