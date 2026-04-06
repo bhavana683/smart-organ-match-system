@@ -31,7 +31,7 @@ const RecipientDashboard = () => {
 
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/ml/matches",
+          "https://smart-organ-match-system.onrender.com/api/ml/matches",
           {
             headers: { Authorization: `Bearer ${token}` }
           }
@@ -46,7 +46,7 @@ const RecipientDashboard = () => {
 
         if (!response.data.recipient) {
           // fallback to dedicated recipient profile endpoint for older responses
-          const profile = await axios.get("http://localhost:5000/api/recipient/dashboard", {
+          const profile = await axios.get("https://smart-organ-match-system.onrender.com/api/recipient/dashboard", {
             headers: { Authorization: `Bearer ${token}` }
           });
           setRecipient(profile.data.recipient);
@@ -68,7 +68,7 @@ const RecipientDashboard = () => {
 
         // Attempt profile-only fallback in case /api/ml/matches is failing on matching logic
         try {
-          const profile = await axios.get("http://localhost:5000/api/recipient/dashboard", {
+          const profile = await axios.get("https://smart-organ-match-system.onrender.com/api/recipient/dashboard", {
             headers: { Authorization: `Bearer ${token}` }
           });
           setRecipient(profile.data.recipient);
@@ -88,7 +88,7 @@ const RecipientDashboard = () => {
 
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/ml/matches`,
+        `https://smart-organ-match-system.onrender.com/api/ml/matches`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
@@ -108,7 +108,7 @@ const RecipientDashboard = () => {
     setChatLoading(true);
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/ml/start-chat",
+        "https://smart-organ-match-system.onrender.com/api/ml/start-chat",
         { donorId: match.donorId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -142,7 +142,7 @@ const RecipientDashboard = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/ml/update-chat",
+        "https://smart-organ-match-system.onrender.com/api/ml/update-chat",
         {
           transactionId,
           sender,
@@ -185,7 +185,7 @@ const RecipientDashboard = () => {
 
     try {
       await axios.post(
-        "http://localhost:5000/api/ml/confirm-transplant",
+        "https://smart-organ-match-system.onrender.com/api/ml/confirm-transplant",
         { donorId: selectedDonor.donorId, transactionId },
         { headers: { Authorization: `Bearer ${token}` } }
       );

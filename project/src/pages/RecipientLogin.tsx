@@ -23,7 +23,7 @@ const RecipientLogin = () => {
       setLoading(true);
 
       const res = await axios.post(
-        "http://localhost:5000/api/auth/recipient/login",
+        "https://smart-organ-match-system.onrender.com/api/auth/recipient/login",
         formData
       );
 

@@ -453,7 +453,7 @@ const DonorMedicalDetails = () => {
         aiConsent: donorDraft.consentDetails.aiConsent
       };
 
-      await axios.post("http://localhost:5000/api/donors/register", payload);
+      await axios.post("https://smart-organ-match-system.onrender.com/api/donors/register", payload);
 
       alert("Donor Registered Successfully");
       navigate("/donor-login");

@@ -13,7 +13,7 @@ const DonorDashboard = () => {
     const fetchDonor = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/donors/dashboard",
+          "https://smart-organ-match-system.onrender.com/api/donors/dashboard",
           {
             headers: { Authorization: `Bearer ${token}` },
           }

@@ -734,7 +734,7 @@ const RecipientRegistration = () => {
       })),
     };
 
-    await axios.post("http://localhost:5000/api/recipient/register", payload);
+    await axios.post("https://smart-organ-match-system.onrender.com/api/recipient/register", payload);
 
     alert("Recipient Registered Successfully");
     navigate("/recipient-login");
